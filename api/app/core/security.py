@@ -2,9 +2,9 @@
 Security utilities for authentication and authorization.
 Implements JWT tokens and password hashing (bcrypt) and token handling (JWT).
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
-from jose import JWTError, jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 import bcrypt
 from config import get_settings
 
@@ -34,33 +34,28 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # JWT Tokens
 # ------------------------
 
+def _utcnow():
+    return datetime.now(timezone.utc)
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """
-    Create JWT access token.
-    """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (
-        expires_delta if expires_delta else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    to_encode.update({"exp": expire, "type": "access"})
+    now = _utcnow()
+    exp = now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode = {**data, "type": "access", "iat": int(now.timestamp()), "exp": int(exp.timestamp())}
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def create_refresh_token(data: dict) -> str:
-    """
-    Create JWT refresh token with longer expiration.
-    """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode.update({"exp": expire, "type": "refresh"})
+    now = _utcnow()
+    exp = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode = {**data, "type": "refresh", "iat": int(now.timestamp()), "exp": int(exp.timestamp())}
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str) -> dict:
-    """
-    Decode and validate JWT token.
-    """
     try:
         return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    except ExpiredSignatureError:
+        # temporary clarity
+        raise JWTError("token_expired")
     except JWTError as e:
-        raise e
+        raise

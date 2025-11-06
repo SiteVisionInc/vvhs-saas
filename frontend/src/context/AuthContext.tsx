@@ -27,12 +27,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (has token)
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          api.loadToken(); // Make sure API has the token
+          // Ensure API has the token loaded
+          api.setToken(token);
           const currentUser = await api.getCurrentUser();
           setUser(currentUser);
         } catch (error) {
@@ -49,14 +49,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      // Call API login
+      // Step 1: Call login and get token
+      console.log('Step 1: Calling API login...');
       const tokenResponse = await api.login({ username, password });
+      console.log('Step 1 complete: Token received');
       
-      // Get user profile
+      // Step 2: Token is already set by api.login(), now get user
+      // Add a small delay to ensure token is propagated
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      console.log('Step 2: Getting user profile...');
       const currentUser = await api.getCurrentUser();
+      console.log('Step 2 complete: User retrieved:', currentUser);
       
-      // Set user in context
+      // Step 3: Set user in context
       setUser(currentUser);
+      console.log('Login flow complete');
     } catch (error) {
       console.error('Login failed in AuthContext:', error);
       throw error;
