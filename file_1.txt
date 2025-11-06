@@ -1,0 +1,90 @@
+vvhs-saas/
+├── api/                      # FastAPI backend
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── tenant.py
+│   │   │   ├── user.py
+│   │   │   ├── volunteer.py
+│   │   │   ├── event.py
+│   │   │   ├── audit.py
+│   │   │   └── training.py
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── tenant.py
+│   │   │   ├── user.py
+│   │   │   ├── volunteer.py
+│   │   │   └── auth.py
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── deps.py
+│   │   │   └── v1/
+│   │   │       ├── __init__.py
+│   │   │       ├── auth.py
+│   │   │       ├── tenants.py
+│   │   │       ├── users.py
+│   │   │       ├── volunteers.py
+│   │   │       ├── events.py
+│   │   │       ├── reports.py
+│   │   │       └── integrations.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── security.py
+│   │   │   └── permissions.py
+│   │   └── services/
+│   │       ├── __init__.py
+│   │       ├── audit.py
+│   │       └── train.py
+│   ├── alembic/
+│   │   └── versions/
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── alembic.ini
+├── web/                      # React frontend
+│   ├── src/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   │   ├── AdminLayout.tsx
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   └── Header.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── DashboardStats.tsx
+│   │   │   │   ├── VolunteerStats.tsx
+│   │   │   │   └── RecentActivity.tsx
+│   │   │   ├── tenants/
+│   │   │   │   └── TenantList.tsx
+│   │   │   ├── users/
+│   │   │   │   └── UserList.tsx
+│   │   │   ├── volunteers/
+│   │   │   │   └── VolunteerList.tsx
+│   │   │   └── auth/
+│   │   │       └── LoginForm.tsx
+│   │   ├── pages/
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Tenants.tsx
+│   │   │   ├── Users.tsx
+│   │   │   ├── Volunteers.tsx
+│   │   │   └── Events.tsx
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   ├── hooks/
+│   │   │   └── useAuth.ts
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   └── utils/
+│   │       └── constants.ts
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   ├── Dockerfile
+│   └── index.html
+├── docker-compose.yml
+├── .env.example
+└── README.md

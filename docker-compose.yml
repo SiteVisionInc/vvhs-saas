@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./api
+    container_name: vvhs-api
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - CORS_ORIGINS=https://vvhs-saas.sitevision.com
+    ports:
+      - "8000:8000"   # Host:Container for FastAPI
+    expose:
+      - "8000"
+    volumes:
+      - ./api/app:/app
+    restart: unless-stopped
+    networks:
+      - vvhs-network
+      - caddy
+
+  db:
+    image: postgres:16
+    container_name: vvhs-db
+    environment:
+      POSTGRES_USER: vvhs
+      POSTGRES_PASSWORD: vvhs_password
+      POSTGRES_DB: vvhs_db
+    ports:
+      - "5432:5432"   # Host:Container for Postgres
+    expose:
+      - "5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./api/db_init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - vvhs-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vvhs-frontend
+    depends_on:
+      - api
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - caddy
+
+volumes:
+  db_data:
+
+networks:
+  vvhs-network:
+    name: vvhs-network
+    driver: bridge
+  caddy:
+    name: caddy
+    external: true
