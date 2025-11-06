@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    # BACKEND_CORS_ORIGINS: list[str] = [
+    # "https://vvhs-saas.sitevision.com",
+    # "http://localhost:3000",
+    # "http://localhost:5173"
+    # ]
+
     
     # TRAIN Integration (placeholder)
     TRAIN_API_URL: str = "https://api.train.org/v1"  # TODO: Add real TRAIN API endpoint

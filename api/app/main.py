@@ -38,17 +38,40 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-origins = os.getenv("CORS_ORIGINS", "https://vvhs-saas.sitevision.com").split(",")
+#origins = os.getenv("CORS_ORIGINS", "https://vvhs-saas.sitevision.com").split(",")
+#
+#
+## Configure CORS
+#app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=[
+#        "http://localhost:3000",
+#        "http://localhost:5173",
+#        "https://vvhs-saas.sitevision.com",
+#        "https://api.vvhs-saas.sitevision.com",
+#        "*"  # Allow all origins for debugging
+#    ],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#    expose_headers=["*"]
+#)
 
+origins = [
+    o.strip() for o in os.getenv(
+        "CORS_ORIGINS",
+        "https://vvhs-saas.sitevision.com,https://api.vvhs-saas.sitevision.com"
+    ).split(",") if o.strip()
+]
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,                 
+    allow_credentials=True,               
+    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allow_headers=["Authorization","Content-Type"]
 )
+
 
 
 # Health check endpoint

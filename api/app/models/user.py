@@ -47,8 +47,16 @@ class User(Base):
     phone = Column(String(20))
     
     # Role and permissions
-    role = Column(SQLEnum(UserRole), nullable=False, default=UserRole.SUB_UNIT_STAFF)
-    status = Column(SQLEnum(UserStatus), nullable=False, default=UserStatus.PENDING)
+    role = Column(
+        SQLEnum(UserRole, values_callable=lambda obj: [e.value for e in obj]),
+        nullable=False,
+        default=UserRole.SUB_UNIT_STAFF
+    )
+    status = Column(
+        SQLEnum(UserStatus, values_callable=lambda obj: [e.value for e in obj]),
+        nullable=False,
+        default=UserStatus.PENDING
+    )
     
     # Sub-unit staff permissions (as radio buttons in requirements)
     can_view_data = Column(Boolean, default=True)
@@ -80,3 +88,11 @@ class User(Base):
     def full_name(self):
         """Get user's full name."""
         return f"{self.first_name} {self.last_name}"
+        
+    @property
+    def is_active(self):
+        return self.status == "active"
+
+    @property
+    def is_superuser(self):
+        return self.role == "system_admin"

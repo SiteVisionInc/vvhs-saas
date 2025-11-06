@@ -8,6 +8,15 @@ from schemas.user import UserListResponse, UserResponse
 
 router = APIRouter()
 
+# Add this endpoint to the users router
+@router.get("/me", response_model=UserResponse)
+def get_current_user_profile(
+    current_user: User = Depends(get_current_user)
+):
+    """Get current user profile."""
+    return current_user
+
+
 @router.get("/", response_model=UserListResponse)
 def list_users(
     skip: int = 0,
