@@ -9,7 +9,10 @@ services:
     env_file:
       - .env
     environment:
+      - SECRET_KEY=devsecretkey 
+      - DATABASE_URL=postgresql://vvhs:vvhs_password@vvhs-db:5432/vvhs_db
       - CORS_ORIGINS=https://vvhs-saas.sitevision.com
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440  
     ports:
       - "8000:8000"   # Host:Container for FastAPI
     expose:

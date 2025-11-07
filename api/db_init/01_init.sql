@@ -363,6 +363,27 @@ INSERT INTO volunteers (
  'Physician Assistant', 'Sentara Healthcare', 'Medical Care, Vaccination, Patient Assessment', 'English, French',
  'PA-C, BLS, ACLS', 'TRAIN567890', 'Flexible', 40,
  '2024-06-30', 'cleared');
+ 
+ 
+ 
+ INSERT INTO volunteers (
+    tenant_id, username, email, hashed_password,
+    first_name, last_name,
+    phone_primary, application_status, account_status,
+    city, state, created_at
+) VALUES 
+(1, 'test.volunteer1@vdh.gov', 'test.volunteer1@vdh.gov', 
+ '\$2b\$12\$EImfq5A648cjQzk5djSQxeYO5a/Tic/KWOyVnJdXKkpuCBK/kTGFq',
+ 'Alice', 'Anderson', '555-0001', 'approved', 'active',
+ 'Richmond', 'VA', NOW()),
+(1, 'test.volunteer2@vdh.gov', 'test.volunteer2@vdh.gov',
+ '\$2b\$12\$EImfq5A648cjQzk5djSQxeYO5a/Tic/KWOyVnJdXKkpuCBK/kTGFq',
+ 'Bob', 'Brown', '555-0002', 'pending', 'active', 
+ 'Norfolk', 'VA', NOW()),
+(1, 'test.volunteer3@vdh.gov', 'test.volunteer3@vdh.gov',
+ '\$2b\$12\$EImfq5A648cjQzk5djSQxeYO5a/Tic/KWOyVnJdXKkpuCBK/kTGFq',
+ 'Carol', 'Clark', '555-0003', 'approved', 'active',
+ 'Fairfax', 'VA', NOW());
 
 -- Insert events
 INSERT INTO events (

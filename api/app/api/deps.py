@@ -1,9 +1,8 @@
 """
-Dependency injection for FastAPI endpoints.
+Simplified dependency injection for FastAPI endpoints.
 """
-from typing import Generator, Optional
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
+from fastapi import Depends, HTTPException, status, Request
 from jose import JWTError
 from sqlalchemy.orm import Session
 
@@ -13,32 +12,47 @@ from core.permissions import has_permission, Permission
 from models.user import User, UserRole
 from schemas.auth import TokenData
 
-security = HTTPBearer()
-
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request,
     db: Session = Depends(get_db)
 ) -> User:
     """
     Get current authenticated user from JWT token.
-    
-    Raises:
-        HTTPException: If token is invalid or user not found
+    Simplified version that extracts token from Authorization header.
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    # Get Authorization header
+    auth_header = request.headers.get("Authorization")
     
+    if not auth_header:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authenticated"
+        )
+    
+    # Extract token (expecting "Bearer <token>")
     try:
-        token = credentials.credentials
+        scheme, token = auth_header.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid authentication scheme"
+            )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid authorization header format"
+        )
+    
+    # Decode token
+    try:
         payload = decode_token(token)
-        
         user_id: int = payload.get("sub")
         if user_id is None:
-            raise credentials_exception
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials"
+            )
             
         token_data = TokenData(
             user_id=user_id,
@@ -46,17 +60,25 @@ def get_current_user(
             tenant_id=payload.get("tenant_id"),
             role=payload.get("role")
         )
-    except JWTError:
-        raise credentials_exception
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
     
+    # Get user from database
     user = db.query(User).filter(User.id == token_data.user_id).first()
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
     
+    # Check if user is active
     if user.status != "active":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is not active"
+            detail=f"User account is not active (status: {user.status})"
         )
     
     return user
@@ -77,12 +99,8 @@ def get_current_active_user(
 def require_permission(permission: str):
     """
     Dependency factory for permission checking.
-    
-    Usage:
-        @router.get("/", dependencies=[Depends(require_permission(Permission.VIEW_VOLUNTEERS))])
     """
     def permission_checker(current_user: User = Depends(get_current_user)):
-        # Build user permissions dict for sub-unit staff
         user_permissions = {
             "can_edit_data": current_user.can_edit_data,
             "can_edit_alerts": current_user.can_edit_alerts,
@@ -104,9 +122,6 @@ def require_permission(permission: str):
 def require_role(allowed_roles: list[UserRole]):
     """
     Dependency factory for role checking.
-    
-    Usage:
-        @router.get("/", dependencies=[Depends(require_role([UserRole.SYSTEM_ADMIN]))])
     """
     def role_checker(current_user: User = Depends(get_current_user)):
         if current_user.role not in allowed_roles:

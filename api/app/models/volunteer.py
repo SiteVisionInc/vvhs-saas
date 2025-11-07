@@ -1,6 +1,6 @@
 """
 Volunteer model with comprehensive profile management.
-Supports application workflow and status tracking.
+FIXED: Matches actual database schema from 01_init.sql
 """
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Date, Enum as SQLEnum
 from sqlalchemy.orm import relationship
@@ -37,6 +37,7 @@ class Volunteer(Base):
     """
     Volunteer profile model.
     Core entity for the volunteer management system.
+    FIXED to match actual database columns.
     """
     __tablename__ = "volunteers"
     
@@ -69,55 +70,40 @@ class Volunteer(Base):
     emergency_contact_relationship = Column(String(100))
     
     # Application Status
-    application_status = Column(
-        SQLEnum(VolunteerStatus), 
-        nullable=False, 
-        default=VolunteerStatus.INCOMPLETE,
-        index=True
-    )
-    account_status = Column(
-        SQLEnum(AccountStatus),
-        nullable=False,
-        default=AccountStatus.ACTIVE
-    )
-    mrc_level = Column(SQLEnum(MRCLevel), default=MRCLevel.LEVEL_1)
+    application_status = Column(String(20), default='pending', index=True)
+    account_status = Column(String(20), default='active')
+    mrc_level = Column(String(20))
     
-    # Professional Information
-    occupation = Column(String(255))
+    # Profile Details (matching DB columns exactly)
+    occupation = Column(String(100))
     employer = Column(String(255))
-    professional_skills = Column(Text)  # JSON array of skills
+    skills = Column(Text)  # This is TEXT in DB, not professional_skills
+    languages = Column(String(255))
     
-    # Credentials and Licenses
-    license_number = Column(String(100))
-    license_type = Column(String(100))
-    license_state = Column(String(2))
-    license_expiration = Column(Date)
-    certification_info = Column(Text)  # JSON for multiple certifications
+    # Training and Credentials
+    certifications = Column(Text)
+    train_id = Column(String(100))
+    train_data = Column(Text)
     
-    # Availability and Preferences
-    availability_info = Column(Text)  # JSON for availability schedule
-    preferred_roles = Column(Text)  # JSON array of preferred roles
+    # Availability
+    availability = Column(Text)
+    travel_distance = Column(Integer, default=25)
     
-    # Groups and Roles (from requirements)
-    assigned_groups = Column(Text)  # JSON array: ["Current Responders", "Emergency Response Volunteers"]
-    assigned_roles = Column(Text)   # JSON array: ["General Support", "Medical Support"]
+    # Background Check
+    background_check_date = Column(Date)
+    background_check_status = Column(String(20))
     
-    # Engagement Metrics
-    total_hours = Column(Integer, default=0)
-    alert_response_rate = Column(Integer, default=0)  # Percentage
-    badges_earned = Column(Text)  # JSON array of badge objects
-    
-    # Dates
-    application_date = Column(DateTime, default=datetime.utcnow)
-    approval_date = Column(DateTime)
-    last_activity_date = Column(DateTime)
+    # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_activity = Column(DateTime)
+    approved_at = Column(DateTime)
+    approved_by = Column(Integer, ForeignKey("users.id"))
     
     # Relationships
     tenant = relationship("Tenant", back_populates="volunteers")
     event_assignments = relationship("EventAssignment", back_populates="volunteer")
-    training_records = relationship("TrainingRecord", back_populates="volunteer")
+    training_records = relationship("TrainingRecord", back_populates="volunteer", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Volunteer(id={self.id}, name='{self.full_name}', status='{self.application_status}')>"
@@ -128,3 +114,16 @@ class Volunteer(Base):
         if self.middle_name:
             return f"{self.first_name} {self.middle_name} {self.last_name}"
         return f"{self.first_name} {self.last_name}"
+    
+    # Computed properties for compatibility
+    @property
+    def total_hours(self):
+        """Calculate total hours from event assignments."""
+        if not self.event_assignments:
+            return 0
+        return sum(a.hours_completed or 0 for a in self.event_assignments)
+    
+    @property
+    def status(self):
+        """Alias for application_status for compatibility."""
+        return self.application_status

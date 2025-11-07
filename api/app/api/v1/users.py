@@ -30,3 +30,16 @@ def list_users(
     return UserListResponse(total=total, items=users)
 
 # TODO: Add CRUD endpoints for users
+
+from fastapi import Request
+from api.v1 import users
+
+# Add a debug endpoint to the users router
+@users.router.get("/debug-headers")
+async def debug_headers(request: Request):
+    headers = dict(request.headers)
+    return {
+        "headers": headers,
+        "has_authorization": "authorization" in headers,
+        "authorization_value": headers.get("authorization", "NOT FOUND")
+    }

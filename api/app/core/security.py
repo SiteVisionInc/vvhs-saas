@@ -1,10 +1,11 @@
 """
 Security utilities for authentication and authorization.
 Implements JWT tokens and password hashing (bcrypt) and token handling (JWT).
+FIXED: Ensures 'sub' claim is always a string for JWT compliance.
 """
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from jose import JWTError, jwt, ExpiredSignatureError
+from jose import JWTError, jwt
 import bcrypt
 from config import get_settings
 
@@ -34,28 +35,52 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # JWT Tokens
 # ------------------------
 
-def _utcnow():
-    return datetime.now(timezone.utc)
-
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    now = _utcnow()
-    exp = now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode = {**data, "type": "access", "iat": int(now.timestamp()), "exp": int(exp.timestamp())}
+    """
+    Create JWT access token.
+    FIXED: Ensures 'sub' is always a string.
+    """
+    to_encode = data.copy()
+    
+    # Ensure 'sub' is a string (JWT standard requires it)
+    if 'sub' in to_encode:
+        to_encode['sub'] = str(to_encode['sub'])
+    
+    expire = datetime.utcnow() + (
+        expires_delta if expires_delta else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def create_refresh_token(data: dict) -> str:
-    now = _utcnow()
-    exp = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode = {**data, "type": "refresh", "iat": int(now.timestamp()), "exp": int(exp.timestamp())}
+    """
+    Create JWT refresh token with longer expiration.
+    FIXED: Ensures 'sub' is always a string.
+    """
+    to_encode = data.copy()
+    
+    # Ensure 'sub' is a string
+    if 'sub' in to_encode:
+        to_encode['sub'] = str(to_encode['sub'])
+    
+    expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "type": "refresh"})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str) -> dict:
+    """
+    Decode and validate JWT token.
+    FIXED: Converts 'sub' back to integer after decoding.
+    """
     try:
-        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-    except ExpiredSignatureError:
-        # temporary clarity
-        raise JWTError("token_expired")
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        
+        # Convert 'sub' back to integer if it's the user ID
+        if 'sub' in payload and payload['sub'].isdigit():
+            payload['sub'] = int(payload['sub'])
+            
+        return payload
     except JWTError as e:
-        raise
+        raise e
