@@ -8,7 +8,7 @@ import { LoginRequest, TokenResponse, User, Volunteer, Event } from '../types';
 //import type { InternalAxiosRequestConfig } from 'axios';
 
 class ApiService {
-  private client: AxiosInstance;
+  public client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({

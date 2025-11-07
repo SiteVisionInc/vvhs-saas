@@ -13,6 +13,8 @@ class ActivityType(str, enum.Enum):
     """Event activity type from requirements."""
     EMERGENCY = "emergency"
     NON_EMERGENCY = "non_emergency"
+    # Note: This enum is kept for backward compatibility but not used in the model
+    # The database column uses VARCHAR(50) to allow flexible activity types
 
 
 class EventStatus(str, enum.Enum):
@@ -56,7 +58,7 @@ class Event(Base):
     end_date = Column(DateTime)
     
     # Event Classification
-    activity_type = Column(SQLEnum(ActivityType), nullable=False)
+    activity_type = Column(String(50), nullable=False)  # Changed from SQLEnum to String to match database VARCHAR(50)
     response_name = Column(String(255))  # e.g., "COVID-19 Response"
     mission_types = Column(Text)  # JSON array: ["Behavioral Health/Resiliency", "Infection Prevention Education"]
     requestor_type = Column(String(100))
@@ -68,7 +70,7 @@ class Event(Base):
     districts = Column(Text)  # JSON array of district names
     
     # Status
-    status = Column(SQLEnum(EventStatus), nullable=False, default=EventStatus.DRAFT)
+    status = Column(String(20), nullable=False, default='draft')  # Changed from SQLEnum to String to match database VARCHAR(20)
     
     # Impact Tracking (from requirements)
     impact_data = Column(Text)  # JSON: {"vaccines_administered": 150, "screenings": 75}
@@ -102,30 +104,25 @@ class Shift(Base):
     description = Column(Text)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
-    is_overnight = Column(Boolean, default=False)
     
     # Capacity
-    slots_total = Column(Integer, nullable=False, default=1)
-    slots_filled = Column(Integer, default=0)
+    max_volunteers = Column(Integer)
+    min_volunteers = Column(Integer, default=1)
     
     # Requirements
-    required_training = Column(Text)  # JSON array of required training IDs
-    required_certifications = Column(Text)  # JSON array
+    required_skills = Column(Text)
+    location = Column(String(255))
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     event = relationship("Event", back_populates="shifts")
     assignments = relationship("EventAssignment", back_populates="shift")
     
-    @property
-    def is_full(self):
-        """Check if shift is at capacity."""
-        return self.slots_filled >= self.slots_total
-    
     def __repr__(self):
-        return f"<Shift(id={self.id}, name='{self.name}', slots={self.slots_filled}/{self.slots_total})>"
+        return f"<Shift(id={self.id}, name='{self.name}')>"
 
 
 class EventAssignment(Base):
@@ -141,20 +138,24 @@ class EventAssignment(Base):
     volunteer_id = Column(Integer, ForeignKey("volunteers.id"), nullable=False, index=True)
     
     # Assignment Details
-    status = Column(SQLEnum(AssignmentStatus), nullable=False, default=AssignmentStatus.PENDING)
+    status = Column(String(20), nullable=False, default='pending')  # Changed from SQLEnum to String
     assigned_by = Column(Integer, ForeignKey("users.id"))
     
     # Time Tracking
     check_in_time = Column(DateTime)
     check_out_time = Column(DateTime)
+    hours_completed = Column(Integer, default=0)
     hours_served = Column(Integer, default=0)
     
     # Notes
+    notes = Column(Text)
     coordinator_notes = Column(Text)
     volunteer_notes = Column(Text)
     
     # Timestamps
     assigned_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    confirmed_at = Column(DateTime)
+    completed_at = Column(DateTime)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
