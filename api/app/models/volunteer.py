@@ -1,8 +1,8 @@
 """
 Volunteer model with comprehensive profile management.
-FIXED: Matches actual database schema from 01_init.sql
+Enhanced to match the new database schema with all fields.
 """
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Date, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Date, Enum as SQLEnum, DECIMAL
 from sqlalchemy.orm import relationship
 from datetime import datetime, date
 import enum
@@ -10,7 +10,7 @@ from database import Base
 
 
 class VolunteerStatus(str, enum.Enum):
-    """Volunteer application status from dashboard requirements."""
+    """Volunteer application status."""
     APPROVED = "approved"
     PENDING = "pending"
     INCOMPLETE = "incomplete"
@@ -35,9 +35,8 @@ class MRCLevel(str, enum.Enum):
 
 class Volunteer(Base):
     """
-    Volunteer profile model.
-    Core entity for the volunteer management system.
-    FIXED to match actual database columns.
+    Volunteer profile model - Enhanced version.
+    Matches the enhanced database schema with all comprehensive fields.
     """
     __tablename__ = "volunteers"
     
@@ -74,35 +73,57 @@ class Volunteer(Base):
     account_status = Column(String(20), default='active')
     mrc_level = Column(String(20))
     
-    # Profile Details (matching DB columns exactly)
+    # Professional Information
     occupation = Column(String(100))
     employer = Column(String(255))
-    skills = Column(Text)  # This is TEXT in DB, not professional_skills
+    professional_skills = Column(Text)
+    license_number = Column(String(100))
+    license_type = Column(String(100))
+    license_state = Column(String(2))
+    license_expiration = Column(Date)
+    
+    # Skills and Languages
+    skills = Column(Text)
     languages = Column(String(255))
     
     # Training and Credentials
     certifications = Column(Text)
+    certification_info = Column(Text)
     train_id = Column(String(100))
     train_data = Column(Text)
     
-    # Availability
+    # Availability and Preferences
     availability = Column(Text)
+    availability_info = Column(Text)
     travel_distance = Column(Integer, default=25)
+    preferred_roles = Column(Text)
+    assigned_groups = Column(Text)
+    assigned_roles = Column(Text)
+    
+    # Metrics and Performance (stored directly now)
+    total_hours = Column(DECIMAL(10, 2), default=0)
+    alert_response_rate = Column(DECIMAL(5, 2), default=0)
+    badges_earned = Column(Text)
     
     # Background Check
     background_check_date = Column(Date)
     background_check_status = Column(String(20))
     
-    # Timestamps
+    # Important Dates
+    application_date = Column(DateTime, default=datetime.utcnow)
+    approval_date = Column(DateTime)
+    last_activity_date = Column(DateTime)
+    
+    # System Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    last_activity = Column(DateTime)
-    approved_at = Column(DateTime)
+    last_activity = Column(DateTime)  # Backward compatibility
+    approved_at = Column(DateTime)    # Backward compatibility
     approved_by = Column(Integer, ForeignKey("users.id"))
     
     # Relationships
     tenant = relationship("Tenant", back_populates="volunteers")
-    event_assignments = relationship("EventAssignment", back_populates="volunteer")
+    event_assignments = relationship("EventAssignment", back_populates="volunteer", lazy="dynamic")
     training_records = relationship("TrainingRecord", back_populates="volunteer", cascade="all, delete-orphan")
     
     def __repr__(self):
@@ -115,15 +136,17 @@ class Volunteer(Base):
             return f"{self.first_name} {self.middle_name} {self.last_name}"
         return f"{self.first_name} {self.last_name}"
     
-    # Computed properties for compatibility
-    @property
-    def total_hours(self):
-        """Calculate total hours from event assignments."""
-        if not self.event_assignments:
-            return 0
-        return sum(a.hours_completed or 0 for a in self.event_assignments)
-    
     @property
     def status(self):
         """Alias for application_status for compatibility."""
         return self.application_status
+    
+    @property
+    def phone(self):
+        """Primary phone for compatibility."""
+        return self.phone_primary
+    
+    @property
+    def hours_completed(self):
+        """Alias for total_hours for compatibility."""
+        return self.total_hours or 0
