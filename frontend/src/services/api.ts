@@ -126,6 +126,17 @@ this.client.interceptors.request.use(
     const res = await this.client.get<Volunteer>(`/v1/volunteers/${id}`);
     return res.data;
   }
+  
+  async getVolunteerStats(): Promise<{
+	total_volunteers: number;
+	approved_volunteers: number;
+	pending_applications: number;
+	incomplete_applications: number;
+	working_volunteers: number;
+	}> {
+	const response = await this.client.get('/v1/volunteers/stats');
+	return response.data;
+  }
 
   async createVolunteer(data: Partial<Volunteer>): Promise<Volunteer> {
     const res = await this.client.post<Volunteer>('/v1/volunteers/', data);
