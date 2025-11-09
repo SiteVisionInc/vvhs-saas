@@ -7,6 +7,8 @@ import axios, {
 import { LoginRequest, TokenResponse, User, Volunteer, Event } from '../types';
 //import type { InternalAxiosRequestConfig } from 'axios';
 
+
+
 class ApiService {
   public client: AxiosInstance;
 
@@ -114,6 +116,38 @@ this.client.interceptors.request.use(
   async getCurrentUser(): Promise<User> {
     const res = await this.client.get<User>('/v1/users/me');
     return res.data;
+  }
+  
+  // ----- Scheduling -----
+  async getAvailableShifts(startDate?: string, endDate?: string, includeFull?: boolean) {
+	const params = new URLSearchParams();
+	if (startDate) params.append('start_date', startDate);
+	if (endDate) params.append('end_date', endDate);
+	if (includeFull) params.append('include_full', 'true');
+	
+	const res = await this.client.get(`/v1/scheduling/shifts/available?${params}`);
+	return res.data;
+  }
+	
+  async signupForShift(shiftId: number, notes?: string) {
+	const res = await this.client.post(`/v1/scheduling/shifts/${shiftId}/signup`, {
+	 shift_id: shiftId,
+	 notes: notes || ''
+	});
+	return res.data;
+  }
+	
+  async joinWaitlist(shiftId: number, autoAccept: boolean = true) {
+	const res = await this.client.post(`/v1/scheduling/shifts/${shiftId}/waitlist`, {
+	 shift_id: shiftId,
+	 auto_accept: autoAccept
+	});
+	return res.data;
+  }
+	
+  async getMyWaitlists() {
+	const res = await this.client.get('/v1/scheduling/waitlists/mine');
+	return res.data;
   }
 
   // ----- Volunteers -----

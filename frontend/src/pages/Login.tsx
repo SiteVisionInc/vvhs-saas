@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -232,6 +234,15 @@ export const Login: React.FC = () => {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
+		  
+		    <div className="text-center mt-6 pt-6 border-t border-gray-200">
+		  	  <p className="text-sm text-gray-600">
+		  	    Don't have an account?{' '}
+		  	    <Link to="/register" className="text-blue-600 hover:text-blue-800 font-semibold">
+		  	   	 Register as a volunteer
+		  	    </Link>
+		  	  </p>
+		    </div>
           
           <div className="flex justify-between items-center">
             <button

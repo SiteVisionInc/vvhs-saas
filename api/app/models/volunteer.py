@@ -124,7 +124,7 @@ class Volunteer(Base):
     # Relationships
     tenant = relationship("Tenant", back_populates="volunteers")
     event_assignments = relationship("EventAssignment", back_populates="volunteer", lazy="dynamic")
-    training_records = relationship("TrainingRecord", back_populates="volunteer", cascade="all, delete-orphan")
+    training_records = relationship("VolunteerTraining", back_populates="volunteer", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Volunteer(id={self.id}, name='{self.full_name}', status='{self.application_status}')>"

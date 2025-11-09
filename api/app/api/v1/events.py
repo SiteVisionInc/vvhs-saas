@@ -49,7 +49,7 @@ def list_events(
         # Calculate max volunteers from shifts
         max_volunteers = 0
         if event.shifts:
-            max_volunteers = sum(shift.slots_total for shift in event.shifts)
+            max_volunteers = sum(shift.max_volunteers or 0 for shift in event.shifts) if event.shifts else 0
         
         result.append(EventSimpleResponse(
             id=str(event.id),
@@ -87,15 +87,22 @@ def list_events_detailed(
         # Count volunteers
         registered = db.query(func.count(EventAssignment.id)).filter(
             EventAssignment.event_id == event.id,
-            EventAssignment.status == AssignmentStatus.CONFIRMED
+            EventAssignment.status == 'confirmed'  # Changed from enum
         ).scalar() or 0
+        
+        # Calculate max volunteers from shifts - FIXED
+        max_volunteers = 0
+        if event.shifts:
+            max_volunteers = sum(s.max_volunteers or 0 for s in event.shifts)
+        if max_volunteers == 0:
+            max_volunteers = 50  # Default
         
         # Create response with computed fields
         response_data = {
             **event.__dict__,
             'title': event.name,
             'event_date': event.start_date.isoformat() if event.start_date else None,
-            'max_volunteers': sum(s.slots_total for s in event.shifts) if event.shifts else 0,
+            'max_volunteers': max_volunteers,
             'registered_volunteers': registered
         }
         

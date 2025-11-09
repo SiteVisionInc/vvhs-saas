@@ -113,6 +113,13 @@ class Shift(Base):
     required_skills = Column(Text)
     location = Column(String(255))
     
+    # Advanced scheduling features (ADD THESE IF MISSING)
+    allow_self_signup = Column(Boolean, default=False)
+    enable_waitlist = Column(Boolean, default=True)
+    waitlist_capacity = Column(Integer, default=10)
+    conflict_detection = Column(Boolean, default=True)
+    template_id = Column(Integer, ForeignKey("shift_templates.id"))
+    
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

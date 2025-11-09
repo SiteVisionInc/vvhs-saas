@@ -8,6 +8,47 @@ from datetime import datetime, date
 from decimal import Decimal
 
 
+# Add this new schema for public registration
+class PublicVolunteerRegistration(BaseModel):
+    """Public volunteer self-registration schema - no authentication required"""
+    # Tenant selection
+    tenant_id: int
+    
+    # Step 1: Basic Information
+    first_name: str = Field(..., min_length=1, max_length=100)
+    middle_name: Optional[str] = None
+    last_name: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    phone_primary: Optional[str] = None
+    address_line1: Optional[str] = None
+    address_line2: Optional[str] = None
+    city: Optional[str] = None
+    state: str = "VA"
+    zip_code: Optional[str] = None
+    
+    # Step 2: Emergency Contact
+    emergency_contact_name: Optional[str] = None
+    emergency_contact_phone: Optional[str] = None
+    emergency_contact_relationship: Optional[str] = None
+    
+    # Step 3: Skills and Availability
+    skills: Optional[str] = None
+    languages: Optional[str] = None
+    availability: Optional[str] = None
+    occupation: Optional[str] = None
+    
+    # Password
+    password: str = Field(..., min_length=8)
+
+
+class RegistrationSuccessResponse(BaseModel):
+    """Response after successful registration"""
+    message: str
+    volunteer_id: int
+    email: str
+    status: str
+
+
 class VolunteerBase(BaseModel):
     """Base volunteer schema."""
     username: str = Field(..., min_length=3, max_length=100)

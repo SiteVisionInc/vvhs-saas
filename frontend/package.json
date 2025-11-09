@@ -9,20 +9,31 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "attr-accept": "2.2.5",
+    "axios": "^1.6.2",
+    "file-selector": "2.1.2",
+    "prop-types": "15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "14.3.8",
+    "react-is": "16.13.1",
     "react-router-dom": "^6.20.0",
-    "axios": "^1.6.2"
+    "react-signature-canvas": "1.0.7",
+    "signature_pad": "2.3.2",
+    "trim-canvas": "0.1.2",
+    "tslib": "2.8.1"
   },
   "devDependencies": {
+    "@types/node": "^20.10.4",
     "@types/react": "^18.2.42",
     "@types/react-dom": "^18.2.17",
-    "@types/node": "^20.10.4",
+    "@types/react-signature-canvas": "^1.0.7",
     "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.7",
-    "tailwindcss": "^3.3.6",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "esbuild": "^0.25.12",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "vite": "^7.2.2"
   }
 }

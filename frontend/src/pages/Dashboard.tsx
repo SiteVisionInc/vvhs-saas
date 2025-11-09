@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { ExpiringDocumentsAlert } from '../components/Documents/ExpiringDocumentsAlert';
+import { useNavigate } from 'react-router-dom';
+
 
 interface Stats {
   total_volunteers: number;
@@ -37,6 +40,7 @@ interface UpcomingEvent {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); 
   const [stats, setStats] = useState<Stats | null>(null);
   const [pendingApplications, setPendingApplications] = useState<PendingApplication[]>([]);
   const [transferRequests, setTransferRequests] = useState<TransferRequest[]>([]);
@@ -44,18 +48,30 @@ export const Dashboard: React.FC = () => {
   const [recentAlerts, setRecentAlerts] = useState<number>(3);
   const [loading, setLoading] = useState(true);
 
+  // ADD THIS DEBUGGING
+  console.log('🎯 Dashboard component mounted');
+  console.log('👤 Current user:', user);
+  console.log('📊 Loading state:', loading);
+  console.log('📈 Stats:', stats);
+
   useEffect(() => {
+    console.log('🔄 Dashboard useEffect triggered');
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
+    console.log('📡 Starting to load dashboard data...');
     try {
       // Load volunteer statistics
+      console.log('📊 Fetching volunteer stats...');
       const statsData = await api.getVolunteerStats();
+      console.log('✅ Stats received:', statsData);
       setStats(statsData);
 
       // Load volunteers list for pending applications
+      console.log('👥 Fetching volunteers...');
       const volunteersData = await api.getVolunteers();
+      console.log('✅ Volunteers received:', volunteersData);
       
       const pending = volunteersData
         .filter((v: any) => v.application_status === 'pending')
@@ -69,7 +85,10 @@ export const Dashboard: React.FC = () => {
       setPendingApplications(pending);
 
       // Load events
+      console.log('📅 Fetching events...');
       const eventsData = await api.getEvents();
+      console.log('✅ Events received:', eventsData);
+      
       const upcoming = eventsData
         .filter((e: any) => new Date(e.start_date) >= new Date())
         .slice(0, 10)
@@ -86,12 +105,16 @@ export const Dashboard: React.FC = () => {
       // Mock transfer requests (you can implement this API later)
       setTransferRequests([]);
 
+      console.log('✅ All dashboard data loaded successfully');
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error('❌ Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
+      console.log('🏁 Dashboard loading complete');
     }
   };
+
+  console.log('🎨 About to render dashboard, loading:', loading);
 
   if (loading) {
     return (
@@ -100,6 +123,8 @@ export const Dashboard: React.FC = () => {
       </div>
     );
   }
+
+  console.log('✅ Rendering full dashboard');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -174,6 +199,10 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+		
+		<div className="lg:col-span-1">
+			<ExpiringDocumentsAlert />
+		</div>
 
         {/* Volunteer Status Breakdown */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -443,36 +472,45 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <button className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg">
-            <svg className="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            <span className="font-semibold text-gray-700">Add Volunteer</span>
-          </button>
-
-          <button className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg">
-            <svg className="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="font-semibold text-gray-700">Create Event</span>
-          </button>
-
-          <button className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg">
-            <svg className="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span className="font-semibold text-gray-700">Send Alert</span>
-          </button>
-
-          <button className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg">
-            <svg className="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="font-semibold text-gray-700">View Reports</span>
-          </button>
-        </div>
+		{/* Quick Actions */}
+		<div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+		<button 
+			onClick={() => navigate('/volunteers/new')}
+			className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg"
+		>
+			<svg className="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+			</svg>
+			<span className="font-semibold text-gray-700">Add Volunteer</span>
+		</button>
+		
+		<button 
+			onClick={() => navigate('/events/new')}
+			className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg"
+		>
+			<svg className="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+			</svg>
+			<span className="font-semibold text-gray-700">Create Event</span>
+		</button>
+		
+		<button className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg">
+			<svg className="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+			</svg>
+			<span className="font-semibold text-gray-700">Send Alert</span>
+		</button>
+		
+		<button 
+			onClick={() => navigate('/reports')}
+			className="flex items-center justify-center bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:shadow-lg"
+		>
+			<svg className="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+			</svg>
+			<span className="font-semibold text-gray-700">View Reports</span>
+		</button>
+		</div>
       </div>
     </div>
   );

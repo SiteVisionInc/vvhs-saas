@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 
 from config import get_settings
 from database import engine, Base
-from api.v1 import auth, tenants, users, volunteers, events, reports, integrations
+from api.v1 import auth, tenants, users, volunteers, events, reports, integrations, scheduling, training, time_tracking, documents, reporting
 import os
 
 settings = get_settings()
@@ -93,6 +93,11 @@ app.include_router(volunteers.router, prefix="/api/v1/volunteers", tags=["Volunt
 app.include_router(events.router, prefix="/api/v1/events", tags=["Events"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(integrations.router, prefix="/api/v1/integrations", tags=["Integrations"])
+app.include_router(scheduling.router, prefix="/api/v1/scheduling", tags=["Scheduling"])
+app.include_router(training.router, prefix="/api/v1/training", tags=["Training"])
+app.include_router(time_tracking.router, prefix="/api/v1/time-tracking", tags=["Time Tracking"])
+app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
+app.include_router(reporting.router, prefix="/api/v1/reporting", tags=["Reporting"])
 
 
 if __name__ == "__main__":

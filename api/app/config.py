@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     # "http://localhost:5173"
     # ]
 
+    # AWS S3 Configuration
+    AWS_ACCESS_KEY_ID: str = "your-access-key-id"
+    AWS_SECRET_ACCESS_KEY: str = "your-secret-access-key"
+    AWS_REGION: str = "us-east-1"
+    S3_BUCKET_NAME: str = "vvhs-documents"
     
     # TRAIN Integration (placeholder)
     TRAIN_API_URL: str = "https://api.train.org/v1"  # TODO: Add real TRAIN API endpoint

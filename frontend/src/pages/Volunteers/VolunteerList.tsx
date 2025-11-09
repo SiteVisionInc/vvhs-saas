@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { Volunteer } from '../../types';
+import { Link } from 'react-router-dom';
+
 
 export const VolunteerList: React.FC = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
@@ -220,6 +222,12 @@ export const VolunteerList: React.FC = () => {
                     {new Date(volunteer.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+				    <Link
+						to={`/volunteers/${volunteer.id}/training`}
+						className="text-purple-600 hover:text-purple-900 mr-3"
+					>
+						Training
+					</Link>
                     <button
                       className="text-indigo-600 hover:text-indigo-900 mr-3"
                       onClick={() => console.log('View', volunteer.id)}
