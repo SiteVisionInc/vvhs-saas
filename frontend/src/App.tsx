@@ -17,6 +17,16 @@ import { ReportsHub } from './pages/Reports/ReportsHub';
 import { ReportLibrary } from './pages/Reports/ReportLibrary';
 import { VolunteerHoursReport } from './pages/Reports/VolunteerHoursReport';
 
+// Behavioral Health Module Imports
+import { BehavioralHealthDashboard } from './pages/BehavioralHealth/BehavioralHealthDashboard';
+import { BHPatientList } from './pages/BehavioralHealth/BHPatientList';
+//import { BHPatientDetail } from './pages/BehavioralHealth/BHPatientDetail';
+//import { BHReferralList } from './pages/BehavioralHealth/BHReferralList';
+import { BHFacilityList } from './pages/BehavioralHealth/BHFacilityList';
+//import { BHBedSearch } from './pages/BehavioralHealth/BHBedSearch';
+//import { BHStaleBeds } from './pages/BehavioralHealth/BHStaleBeds';
+//import { BHBedManagement } from './pages/BehavioralHealth/BHBedManagement';
+
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -129,6 +139,72 @@ const AppContent: React.FC = () => {
 			</PrivateRoute>
 		} 
 		/>
+
+        {/* PROTECTED ROUTES - Behavioral Health Module */}
+        <Route 
+          path="/bh" 
+          element={
+            <PrivateRoute>
+              <BehavioralHealthDashboard />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/patients" 
+          element={
+            <PrivateRoute>
+              <BHPatientList />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/patients/:patientId" 
+          element={
+            <PrivateRoute>
+              <BHPatientDetail />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/referrals" 
+          element={
+            <PrivateRoute>
+              <BHReferralList />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/facilities" 
+          element={
+            <PrivateRoute>
+              <BHFacilityList />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/bed-search" 
+          element={
+            <PrivateRoute>
+              <BHBedSearch />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/beds" 
+          element={
+            <PrivateRoute>
+              <BHBedManagement />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bh/stale-beds" 
+          element={
+            <PrivateRoute>
+              <BHStaleBeds />
+            </PrivateRoute>
+          } 
+        />
         
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

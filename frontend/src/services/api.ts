@@ -191,6 +191,200 @@ this.client.interceptors.request.use(
     const res = await this.client.get<any>('/v1/events/');
     return Array.isArray(res.data) ? res.data : res.data?.items ?? [];
   }
+  
+  
+    // ============================================================================
+  // BEHAVIORAL HEALTH MODULE API METHODS
+  // ============================================================================
+
+  // ----- BH Patients -----
+  async getBHPatients(params?: { skip?: number; limit?: number; risk_level?: string }) {
+    const res = await this.client.get('/v1/bh/patients', { params });
+    return res.data;
+  }
+
+  async getBHPatient(patientId: number) {
+    const res = await this.client.get(`/v1/bh/patients/${patientId}`);
+    return res.data;
+  }
+
+  async createBHPatient(data: any) {
+    const res = await this.client.post('/v1/bh/patients', data);
+    return res.data;
+  }
+
+  async updateBHPatient(patientId: number, data: any) {
+    const res = await this.client.put(`/v1/bh/patients/${patientId}`, data);
+    return res.data;
+  }
+
+  // ----- BH Screenings -----
+  async createBHScreening(data: any) {
+    const res = await this.client.post('/v1/bh/patients/screenings', data);
+    return res.data;
+  }
+
+  async getBHPatientScreenings(patientId: number) {
+    const res = await this.client.get(`/v1/bh/patients/${patientId}/screenings`);
+    return res.data;
+  }
+
+  // ----- BH Consent -----
+  async captureBHConsent(patientId: number, data: any) {
+    const res = await this.client.post(`/v1/bh/patients/${patientId}/consent`, data);
+    return res.data;
+  }
+
+  async getBHPatientConsents(patientId: number) {
+    const res = await this.client.get(`/v1/bh/patients/${patientId}/consents`);
+    return res.data;
+  }
+
+  // ----- BH Facilities -----
+  async getBHFacilities(params?: { 
+    skip?: number; 
+    limit?: number; 
+    facility_type?: string; 
+    is_active?: boolean 
+  }) {
+    const res = await this.client.get('/v1/bh/facilities', { params });
+    return res.data;
+  }
+
+  async getBHFacility(facilityId: number) {
+    const res = await this.client.get(`/v1/bh/facilities/${facilityId}`);
+    return res.data;
+  }
+
+  async createBHFacility(data: any) {
+    const res = await this.client.post('/v1/bh/facilities', data);
+    return res.data;
+  }
+
+  async updateBHFacility(facilityId: number, data: any) {
+    const res = await this.client.put(`/v1/bh/facilities/${facilityId}`, data);
+    return res.data;
+  }
+
+  // ----- BH Bed Availability -----
+  async updateBHBedAvailability(data: any) {
+    const res = await this.client.post('/v1/bh/facilities/beds/update', data);
+    return res.data;
+  }
+
+  async getBHFacilityBeds(facilityId: number) {
+    const res = await this.client.get(`/v1/bh/facilities/${facilityId}/beds`);
+    return res.data;
+  }
+
+  async searchBHBeds(searchParams: any) {
+    const res = await this.client.post('/v1/bh/facilities/search', searchParams);
+    return res.data;
+  }
+
+  async getBHStaleBedAlerts(hoursThreshold: number = 24) {
+    const res = await this.client.get('/v1/bh/facilities/beds/stale-alerts', {
+      params: { hours_threshold: hoursThreshold }
+    });
+    return res.data;
+  }
+
+  // ----- BH Referrals -----
+  async getBHReferrals(params?: { 
+    skip?: number; 
+    limit?: number; 
+    status?: string; 
+    priority?: string 
+  }) {
+    const res = await this.client.get('/v1/bh/referrals', { params });
+    return res.data;
+  }
+
+  async getBHReferral(referralId: number) {
+    const res = await this.client.get(`/v1/bh/referrals/${referralId}`);
+    return res.data;
+  }
+
+  async createBHReferral(data: any) {
+    const res = await this.client.post('/v1/bh/referrals', data);
+    return res.data;
+  }
+
+  async updateBHReferral(referralId: number, data: any) {
+    const res = await this.client.put(`/v1/bh/referrals/${referralId}`, data);
+    return res.data;
+  }
+
+  async submitBHReferral(referralId: number, facilityIds: number[]) {
+    const res = await this.client.post(`/v1/bh/referrals/${referralId}/submit`, { facility_ids: facilityIds });
+    return res.data;
+  }
+
+  async acceptBHReferral(referralId: number, data: any) {
+    const res = await this.client.post(`/v1/bh/referrals/${referralId}/accept`, data);
+    return res.data;
+  }
+
+  async declineBHReferral(referralId: number, data: any) {
+    const res = await this.client.post(`/v1/bh/referrals/${referralId}/decline`, data);
+    return res.data;
+  }
+
+  // ----- BH Placements -----
+  async dischargeBHPlacement(placementId: number, data: any) {
+    const res = await this.client.patch(`/v1/bh/referrals/placements/${placementId}/discharge`, data);
+    return res.data;
+  }
+
+  // ----- BH Follow-ups -----
+  async createBHFollowup(placementId: number, data: any) {
+    const res = await this.client.post(`/v1/bh/referrals/placements/${placementId}/followups`, data);
+    return res.data;
+  }
+
+  async completeBHFollowup(followupId: number, data: any) {
+    const res = await this.client.patch(`/v1/bh/referrals/followups/${followupId}/complete`, data);
+    return res.data;
+  }
+
+  async getBHDueFollowups(daysAhead: number = 7) {
+    const res = await this.client.get('/v1/bh/referrals/followups/due', {
+      params: { days_ahead: daysAhead }
+    });
+    return res.data;
+  }
+
+  // ----- BH Statistics -----
+  async getBHStatistics() {
+    try {
+      const [patients, referrals, facilities, beds] = await Promise.all([
+        this.getBHPatients({ limit: 1000 }),
+        this.getBHReferrals({ limit: 1000 }),
+        this.getBHFacilities({ is_active: true }),
+        this.searchBHBeds({ min_available: 1 })
+      ]);
+
+      return {
+        total_patients: patients.length || 0,
+        total_referrals: referrals.length || 0,
+        pending_referrals: referrals.filter((r: any) => r.status === 'submitted').length || 0,
+        active_placements: referrals.filter((r: any) => r.status === 'placed').length || 0,
+        available_beds: beds.reduce((sum: number, b: any) => sum + (b.available_beds || 0), 0),
+        total_facilities: facilities.length || 0
+      };
+    } catch (error) {
+      console.error('Failed to load BH statistics:', error);
+      return {
+        total_patients: 0,
+        total_referrals: 0,
+        pending_referrals: 0,
+        active_placements: 0,
+        available_beds: 0,
+        total_facilities: 0
+      };
+    }
+  }
+  
 }
 
 export const api = new ApiService();
